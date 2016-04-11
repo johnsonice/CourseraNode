@@ -5,9 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
+//var routes = require('./routes/index');
 var app = express();
 
 // view engine setup
@@ -29,13 +27,16 @@ app.use(express.static(path.join(__dirname, 'public')));
     //handel api requests 
     var apiController = require('./controlers/apiController.js');
 
+// pass express app object to controller
+    htmlController(app); // render all html files 
+    apiController(app); // handel all aip request, put, post, delate
+    
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
-
 // error handlers
 
 // development error handler

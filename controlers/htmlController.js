@@ -1,15 +1,8 @@
 //load dependencies
 var bodyParser = require('body-parser');
+var home = require('../routes/home');
 
 module.exports = function(app){
-    app.get("/testing",function(req,res){});
-    
-    
-    
-    
-    
-    
-    
-    
+    app.get('/',home.homePage);
     
 }

@@ -1,15 +1,9 @@
 //load dependencies
 var bodyParser = require('body-parser');
+var user = require('../routes/user');
 
 module.exports = function(app){
-    app.get("/api/testing",function(req,res){});
-    
-    
-    
-    
-    
-    
-    
+    app.get("/api/test",user.getUserList);
     
     
 }
