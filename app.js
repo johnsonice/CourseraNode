@@ -24,8 +24,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //load all routes
-app.use('/', routes);
-app.use('/users', users);
+    //handel html requests 
+    var htmlController = require('./controlers/htmlController.js');
+    //handel api requests 
+    var apiController = require('./controlers/apiController.js');
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
