@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
 
 //var routes = require('./routes/index');
 var app = express();
@@ -21,45 +22,61 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-//load all routes
-    //handel html requests 
-    var htmlController = require('./controlers/htmlController.js');
-    //handel api requests 
-    var apiController = require('./controlers/apiController.js');
 
-// pass express app object to controller
-    htmlController(app); // render all html files 
-    apiController(app); // handel all aip request, put, post, delate
-    
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
-// error handlers
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
+
+// connect to mongodb 
+  //set up options
+  var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }, 
+                  replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
+  // mongolab uri for testing database  
+  var mongodbUri = 'mongodb://johnsonice:JOHNSONice16@ds013881.mlab.com:13881/johnsonice';
+  //connect
+  mongoose.connect(mongodbUri, options);
+  var conn = mongoose.connection;  
+
+  conn.on('error', console.error.bind(console, 'connection error:'));  
+  
+  conn.once('open', function() {
+    // Wait for the database connection to establish, then start the app. 
+    console.log('connected to mlab');
+    //load all routes
+        //handel html requests 
+        var htmlController = require('./controlers/htmlController.js');
+        //handel api requests 
+        var apiController = require('./controlers/apiController.js');  
+    // pass express app object to controller
+        apiController(app); // handel all aip request, put, post, delate              
+        htmlController(app); // render all html files 
+
+    // catch 404 and forward to error handler
+    app.use(function(req, res, next) {
+      var err = new Error('Not Found!!!');
+      err.status = 404;
+      next(err);
     });
-  });
-}
+    // error handlers
+    // development error handler
+    // will print stacktrace
+    if (app.get('env') === 'development') {
+      app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+          message: err.message,
+          error: err
+        });
+      });
+    }
 
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
+    // production error handler
+    // no stacktraces leaked to user
+    app.use(function(err, req, res, next) {
+      res.status(err.status || 500);
+      res.render('error', {
+        message: err.message,
+        error: {}
+      });
+    });
 
-
+}); // end of mongodb connection 
 module.exports = app;
