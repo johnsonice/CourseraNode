@@ -9,9 +9,12 @@ module.exports = function(app){
     
     //dishes routes
     app.get("/api/dishes",dish.getDishList);
-    app.use("/api/newdish",dish.newDish);
-    app.use("/api/updatedish/:id",dish.updateDish);
-    app.use("/api/newdishcomment/:id",dish.insertComment);
+    app.delete("/api/dish/:id",dish.remove);
+    app.post("/api/newdish",dish.newDish);
+    app.put("/api/updatedish/:id",dish.updateDish);
+     //comments
+    app.post("/api/dishcomments/:id",dish.insertComment);
+    app.delete("/api/dishcomments/:id",dish.removeComments);
 }
 
 
