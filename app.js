@@ -18,45 +18,22 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('12345-67890-09876-54321')); //used signed cookie //set secret key,the key can be anything
 app.use(express.static(path.join(__dirname, 'public')));
 
 //authorization 
-//basic
-function auth(req,res,next){
-    //console.log(req.headers);
-    var authHeader = req.headers.authorization;
-    if(!authHeader){
-        var err = new Error('You are not authenticated!');
-        err.status = 401;
-        next(err);
-        return;
-    }
-    var auth = new Buffer(authHeader.split(' ')[1],
-    'base64').toString().split(':');
-    var user = auth[0];
-    var pass = auth[1];
-    if (user == 'admin' && pass == 'password') {
-        next();
-    }else{
-        var err = new Error('You are not authenticated!');
-        err.status = 401;
-        next(err);
-        return;
-    }
-}
-app.use(auth);
-app.use(function(err,req,res,next){
-    res.writeHead(err.status ||500,{
-        'WWW-Authenticate': 'Basic',
-        'Content-Type': 'text/plain'
-    });
-    res.end(err.message);
-});
-
-
-
-
+//basic - need to be authorized to access anything 
+    //var basicAuth = require('./tools/auth/basicauth');
+    //app.use(basicAuth.auth,basicAuth.message);
+// authorize using cookies
+    //var cookieAuth = require('./tools/auth/cookieauth');
+    //app.use(cookieAuth.auth,cookieAuth.message);
+// authorize using sessions
+    var sessionAuth = require('./tools/auth/sessionauth');
+    app.use(sessionAuth.session);
+    app.use(sessionAuth.auth,sessionAuth.message);
+    
+    
 // connect to mongodb 
   //set up options
   var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }, 

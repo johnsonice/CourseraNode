@@ -5,7 +5,7 @@ var dish = require('../routes/api/dish');
 
 module.exports = function(app){
 	//test
-    app.get("/api/test",user.getUserList);
+    app.get("/api/users",user.getUserList);
     
     //dishes routes
     app.get("/api/dishes",dish.getDishList);
