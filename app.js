@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var expressSession = require('express-session');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -22,28 +23,28 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser('12345-67890-09876-54321')); //used signed cookie //set secret key,the key can be anything
+app.use(cookieParser());
+app.use(expressSession({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave:false,
+    saveUninitialized: false
+}))
 app.use(express.static(path.join(__dirname, 'public')));
-
-//authorization 
-//basic - need to be authorized to access anything 
-    //var basicAuth = require('./tools/auth/basicauth');
-    //app.use(basicAuth.auth,basicAuth.message);
-// authorize using cookies
-    //var cookieAuth = require('./tools/auth/cookieauth');
-    //app.use(cookieAuth.auth,cookieAuth.message);
-// authorize using sessions
-    //var sessionAuth = require('./tools/auth/sessionauth');
-    //app.use(sessionAuth.session);
-    //app.use(sessionAuth.auth,sessionAuth.message);
     
 // authorize using passort 
     //passport config
     var User = require('./models/users');
     app.use(passport.initialize());
-    passport.use(new LocalStrategy(User.authenticate()));
-    passport.serializeUser(User.serializeUser());
-    passport.deserializeUser(User.deserializeUser());
+    app.use(passport.session());
+    passport.use(User.createStrategy());
+    passport.serializeUser(function(user,done){
+        done(null,user.id)
+    });
+    passport.deserializeUser(function(id,done){
+        User.findById,function(err,user){
+            done(err,user);
+        }
+    });
         
 // connect to mongodb 
   //set up options

@@ -15,6 +15,13 @@ var UserSchema = new Schema({
         }
     },
     
+    email:{
+        type: String,
+        index:{
+            unique:true
+            }
+    },
+    
     admin: {
         type: Boolean,
         default: false
