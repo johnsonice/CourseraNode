@@ -16,8 +16,9 @@ module.exports = function(app){
     app.post("/api/newdish",dish.newDish);
     app.put("/api/updatedish/:id",dish.updateDish);
      //comments
-    app.post("/api/dishcomments/:id",dish.insertComment);
-    app.delete("/api/dishcomments/:id",dish.removeComments);
+    app.post("/api/dishcomments/:id",Verify.verifyOrdinaryUser,dish.insertComment);
+    app.put("/api.dishcomments/:dishId/:commentId",Verify.verifyOrdinaryUser,dish.editComments);
+    app.delete("/api/dishcomments/:id",Verify.verifyOrdinaryUser,dish.removeComments);
 }
 
 

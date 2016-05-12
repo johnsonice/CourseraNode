@@ -14,9 +14,9 @@ var dishcommentsSchema = new Schema({
 		type:String,
 		require:true
 	},
-	author:{
-		type: String,
-		required:true
+	postedBy:{
+		type: mongoose.Schema.Types.ObjectId,
+		ref:'Users'
 	}
 	},
 	{timestamps: true} // this will add created at and updated at automatically

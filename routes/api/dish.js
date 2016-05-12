@@ -4,7 +4,9 @@ var Dishes = require('../../models/dishes');
 
 /* GET users listing. */
 exports.getDishList = function(req,res,next) {
-		Dishes.find({},function(err,dishes){
+		Dishes.find({})
+        .populate('comments.postedBy')
+        .exec(function(err,dishes){
 			if(err) throw err;
 			res.json(dishes);
 		});
@@ -53,11 +55,13 @@ exports.insertComment = function(req,res,next) {
 	Dishes.findById(dishId)
 		.exec(function(err,dish){
 		if(err) throw err;
+        req.body.postedBy = req.decoded._doc._id; //store user id here for population
+        
         console.log(dish);
 		dish.comments.push({
 			rating:req.body.rating,
 			comment:req.body.comment,
-			author:req.body.author
+			postedBy:req.body.postedBy
 		});
 
 		dish.save(function(err,dish){
@@ -79,4 +83,23 @@ exports.removeComments = function(req,res,next) {
                 res.json(dish);
             });
 	      });
+};
+
+exports.editComments = function(req,res,next){
+    var dishId = req.params.dishId;
+    var commentId = req.params.commentId
+    var userId = req.decoded._doc._id;
+    
+    Dishes.findById(dishId)
+        .exec(function(err,dish){
+            dish.comments.id(commentId).remove();
+            req.body.postedBy = userId;
+            dish.comments.push(req.body);
+            
+            dish.save(function(err,dish){
+                if(err) throw err;
+                console.log('Updated Comments!');
+                res.json(dish);
+            }); 
+        });  
 };

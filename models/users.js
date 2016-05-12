@@ -18,11 +18,25 @@ var UserSchema = new Schema({
     admin: {
         type: Boolean,
         default: false
+    },
+    
+    firstname:{
+        type:String,
+        default:''
+    },
+        
+    lastname:{
+        type:String,
+        default:''
     }
 
 });
 
+UserSchema.methods.getName = function(){
+    return (this.firstname + ' ' + this.lastname);
+};
+
 UserSchema.plugin(passportLocalMongoose); //use passport-local-mongoose plugin
 
-var Users = mongoose.model('User', UserSchema);
+var Users = mongoose.model('Users', UserSchema);
 module.exports = Users;
