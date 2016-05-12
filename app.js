@@ -5,6 +5,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+
+var config = require('./config');
 
 //var routes = require('./routes/index');
 var app = express();
@@ -29,11 +33,18 @@ app.use(express.static(path.join(__dirname, 'public')));
     //var cookieAuth = require('./tools/auth/cookieauth');
     //app.use(cookieAuth.auth,cookieAuth.message);
 // authorize using sessions
-    var sessionAuth = require('./tools/auth/sessionauth');
-    app.use(sessionAuth.session);
-    app.use(sessionAuth.auth,sessionAuth.message);
+    //var sessionAuth = require('./tools/auth/sessionauth');
+    //app.use(sessionAuth.session);
+    //app.use(sessionAuth.auth,sessionAuth.message);
     
-    
+// authorize using passort 
+    //passport config
+    var User = require('./models/users');
+    app.use(passport.initialize());
+    passport.use(new LocalStrategy(User.authenticate()));
+    passport.serializeUser(User.serializeUser());
+    passport.deserializeUser(User.deserializeUser());
+        
 // connect to mongodb 
   //set up options
   var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }, 
@@ -41,7 +52,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   // mongolab uri for testing database  
   var mongodbUri = 'mongodb://johnsonice:JOHNSONice16@ds013881.mlab.com:13881/johnsonice';
   //connect
-  mongoose.connect(mongodbUri, options);
+  mongoose.connect(config.mongoUrl, options);
   var conn = mongoose.connection;  
 
   conn.on('error', console.error.bind(console, 'connection error:'));  
@@ -70,7 +81,7 @@ app.use(express.static(path.join(__dirname, 'public')));
     if (app.get('env') === 'development') {
       app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
+        res.json({
           message: err.message,
           error: err
         });
@@ -81,7 +92,7 @@ app.use(express.static(path.join(__dirname, 'public')));
     // no stacktraces leaked to user
     app.use(function(err, req, res, next) {
       res.status(err.status || 500);
-      res.render('error', {
+      res.json({
         message: err.message,
         error: {}
       });
