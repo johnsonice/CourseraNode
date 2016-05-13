@@ -11,13 +11,13 @@ module.exports = function(app){
     app.post("/api/user/login",user.login); 
     app.get("/api/user/logout",user.logout); 
     //dishes routes
-    app.get("/api/dishes",dish.getDishList);
+    app.get("/api/dishes",Verify.verifyOrdinaryUser,dish.getDishList);
     app.delete("/api/dish/:id",dish.remove);
     app.post("/api/newdish",dish.newDish);
     app.put("/api/updatedish/:id",dish.updateDish);
      //comments
     app.post("/api/dishcomments/:id",Verify.verifyOrdinaryUser,dish.insertComment);
-    app.put("/api.dishcomments/:dishId/:commentId",Verify.verifyOrdinaryUser,dish.editComments);
+    app.put("/api/dishcomments/:dishId/:commentId",Verify.verifyOrdinaryUser,dish.editComments);
     app.delete("/api/dishcomments/:id",Verify.verifyOrdinaryUser,dish.removeComments);
 }
 

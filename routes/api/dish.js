@@ -56,14 +56,12 @@ exports.insertComment = function(req,res,next) {
 		.exec(function(err,dish){
 		if(err) throw err;
         req.body.postedBy = req.decoded._doc._id; //store user id here for population
-        
-        console.log(dish);
 		dish.comments.push({
 			rating:req.body.rating,
 			comment:req.body.comment,
 			postedBy:req.body.postedBy
 		});
-
+        console.log(dish);
 		dish.save(function(err,dish){
 			if(err) throw err;
 			res.json(dish);

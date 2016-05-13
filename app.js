@@ -4,6 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var validator = require('express-validator');
+var bcrypt = require('bcryptjs');
 var mongoose = require('mongoose');
 var expressSession = require('express-session');
 var passport = require('passport');
@@ -23,6 +25,7 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(validator());
 app.use(cookieParser());
 app.use(expressSession({
     secret: process.env.SESSION_SECRET || 'secret',
@@ -36,14 +39,51 @@ app.use(express.static(path.join(__dirname, 'public')));
     var User = require('./models/users');
     app.use(passport.initialize());
     app.use(passport.session());
-    passport.use(User.createStrategy());
+    
+    passport.use(new LocalStrategy({
+        usernameField: 'email',
+        passwordField:'password',
+        badRequestMessage: 'ERR_MISSING_CREDENTIALS'  
+        },
+        function(email,password,done){
+            //asynchronous verification
+            User.getUserByEmail(email,function(err,user){
+                if(err){
+                    res.status(err.status || 500);
+                    res.json({
+                        message: err.message,
+                        error: err
+                    });
+                }
+                if(!user){
+                    return done(null,false,{message:'Unkonw User'});
+                }
+                
+                User.comparePassword(password,user.password,function(err,isMatch){
+                    if(err){
+                        res.status(err.status || 500);
+                        res.json({
+                            message: err.message,
+                            error: err
+                        });
+                    }
+                    
+                    if(isMatch){
+                        return done(null,user);
+                    }else{
+                        return done(null, false, {message:'Invalid password'});
+                    }
+                });
+            }); // end of get user by emal 
+        })//end of local strategy
+    );
     passport.serializeUser(function(user,done){
         done(null,user.id)
     });
     passport.deserializeUser(function(id,done){
-        User.findById,function(err,user){
+        User.findById(id,function(err,user){
             done(err,user);
-        }
+        });
     });
         
 // connect to mongodb 
@@ -51,7 +91,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   var options = { server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }, 
                   replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS : 30000 } } };
   // mongolab uri for testing database  
-  var mongodbUri = 'mongodb://johnsonice:JOHNSONice16@ds013881.mlab.com:13881/johnsonice';
+  //var mongodbUri = 'mongodb://johnsonice:JOHNSONice16@ds013881.mlab.com:13881/johnsonice';
   //connect
   mongoose.connect(config.mongoUrl, options);
   var conn = mongoose.connection;  
@@ -95,7 +135,7 @@ app.use(express.static(path.join(__dirname, 'public')));
       res.status(err.status || 500);
       res.json({
         message: err.message,
-        error: {}
+        error: err
       });
     });
 
